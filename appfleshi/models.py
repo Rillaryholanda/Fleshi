@@ -1,8 +1,13 @@
 from email.policy import default
 
-from appfleshi import database
+from flask_login import UserMixin
+from appfleshi import database, login_manager
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 class User(database.Model):
     id = database.Column(database.Integer, primary_key=True)
