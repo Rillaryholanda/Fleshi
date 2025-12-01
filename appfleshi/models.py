@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-class User(database.Model):
+class User(database.Model,UserMixin):
     id = database.Column(database.Integer, primary_key=True)
     username = database.Column(database.String(20), unique=True, nullable=False)
     email = database.Column(database.String(100), unique=True, nullable=False)
