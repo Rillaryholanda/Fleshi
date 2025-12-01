@@ -4,8 +4,10 @@ from sqlalchemy.sql.functions import user
 from sqlalchemy.testing.provision import register
 from appfleshi import app, database, bcrypt
 from appfleshi.models import User, Photo
-from appfleshi.forms import LoginForm, RegisterForm
+from appfleshi.forms import LoginForm, RegisterForm, PhotoForm
 from appfleshi import app
+import os
+from werkzeug.utils import secure_filename
 
 @app.route('/', methods=['GET', 'POST'])
 def homepage():
@@ -30,14 +32,23 @@ def createaccount():
         return redirect(url_for('profile', user_id=user.id))
     return render_template('createaccount.html', form=register_form)
 
-@app.route('/profile/<user_id>')
+@app.route('/profile/<user_id>', methods=['GET', 'POST'])
 @login_required
 def profile(user_id):
     if int (user_id) == int(current_user.id):
-        return render_template('profile.html', user=current_user)
+        photo_form = PhotoForm()
+        if photo_form.validate_on_submit():
+            file = photo_form.photo.data
+            secure_name = secure_filename(file.filename)
+            path = os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config["UPLOAD_FOLDER"], secure_name)
+            file.save(path)
+            photo = Photo(file_name=secure_name, user_id=current_user.id)
+            database.session.add(photo)
+            database.session.commit()
+        return render_template('profile.html', user=current_user, form=photo_form)
     else:
         User = user.query.get(int(user_id))
-        return render_template('profile.html', user=User)
+        return render_template('profile.html', user=User, form=None)
 @app.route('/logout')
 @login_required
 def logout():
