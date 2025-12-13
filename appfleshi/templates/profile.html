@@ -5,20 +5,48 @@
 {% endblock %}
 
 {% block body %}
-    <body>
-        {% include "navbar.html" %}
-        <h1>Perfil do usuário: {{ user.username }}</h1>
+<body>
+    {% include "navbar.html" %}
+    <h1>Perfil do usuário: {{ user.username }}</h1>
 
-        {% if form %}
-            <form method="post" enctype="multipart/form-data">
-                {{ form.csrf_token }}
+    {% if form %}
+        <form method="post" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+
+            <!-- Upload da foto -->
+            <div>
+                {{ form.photo.label }}<br>
                 {{ form.photo() }}
-                {{ form.submit() }}
-            </form>
-        {% endif %}
+            </div>
 
-        {% for photo in user.photos %}
-            <img src="{{ url_for('static', filename='posts_photos/'~photo.file_name) }}" alt="Imagem">
-        {% endfor %}
-    </body>
+            <!-- Campo de legenda -->
+            <div>
+                {{ form.caption.label }}<br>
+                {{ form.caption() }}
+            </div>
+
+            <!-- Botão de envio -->
+            <div>
+                {{ form.submit() }}
+            </div>
+        </form>
+    {% endif %}
+
+    {% for photo in user.photos %}
+        <div class="photo-card">
+            <img src="{{ url_for('static', filename='posts_photos/' ~ photo.file_name) }}" alt="Imagem">
+
+            {% if photo.caption %}
+                <p>{{ photo.caption }}</p>
+            {% endif %}
+
+            {% if current_user.id == photo.user_id %}
+                <form action="{{ url_for('delete_photo', photo_id=photo.id) }}" method="POST">
+                    <button type="submit">Apagar</button>
+                </form>
+            {% endif %}
+        </div>
+    {% endfor %}
+</body>
 {% endblock %}
+

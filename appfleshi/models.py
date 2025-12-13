@@ -23,3 +23,4 @@ class Photo(database.Model):
     file_name = database.Column(database.String(255), default="default.png")
     upload_date = database.Column(database.DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
     user_id = database.Column(database.Integer, database.ForeignKey('user.id'), nullable=False)
+    caption = database.Column(database.String(300))

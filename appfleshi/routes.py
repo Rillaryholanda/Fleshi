@@ -42,7 +42,7 @@ def profile(user_id):
             secure_name = secure_filename(file.filename)
             path = os.path.join(os.path.abspath(os.path.dirname(__file__)),app.config["UPLOAD_FOLDER"], secure_name)
             file.save(path)
-            photo = Photo(file_name=secure_name, user_id=current_user.id)
+            photo = Photo(file_name=secure_name, caption=photo_form.caption.data,  user_id=current_user.id)
             database.session.add(photo)
             database.session.commit()
         return render_template('profile.html', user=current_user, form=photo_form)
@@ -60,3 +60,25 @@ def logout():
 def feed():
     photos = Photo.query.order_by(Photo.upload_date.desc()).all()
     return render_template('feed.html', photos=photos)
+
+@app.route('/delete_photo/<int:photo_id>', methods=['POST'])
+@login_required
+def delete_photo(photo_id):
+    photo = Photo.query.get_or_404(photo_id)
+
+    if photo.user_id != current_user.id:
+        return redirect(url_for('feed'))
+
+    path = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        app.config["UPLOAD_FOLDER"],
+        photo.file_name
+    )
+
+    if os.path.exists(path):
+        os.remove(path)
+
+    database.session.delete(photo)
+    database.session.commit()
+
+    return redirect(url_for('profile', user_id=current_user.id))

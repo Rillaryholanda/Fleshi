@@ -5,6 +5,7 @@ from appfleshi.models import User
 
 class PhotoForm(FlaskForm):
     photo = FileField('Foto', validators=[DataRequired()])
+    caption = StringField('Legenda', validators=[Length(max=300)])
     submit = SubmitField('Postar')
 
 class LoginForm(FlaskForm):
